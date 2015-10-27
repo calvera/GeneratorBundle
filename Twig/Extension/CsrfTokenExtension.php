@@ -29,7 +29,8 @@ class CsrfTokenExtension extends \Twig_Extension
     public function getFilters()
     {
         return array(
-            'csrf_token' => new \Twig_SimpleFilter('csrf_filter', array($this, 'getCsrfToken')),
+            'csrf_token' => new \Twig_SimpleFilter('csrf_token', array($this, 'getCsrfToken')),
+            'csrf_filter' => new \Twig_SimpleFilter('csrf_filter', array($this, 'getCsrfToken')),
         );
     }
 
