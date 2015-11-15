@@ -169,4 +169,11 @@
     if (S2A.hasOwnProperty('nestedTreeAdminOptions')) {
         new S2A.nestedListManager(S2A.nestedTreeAdminOptions);
     }
+
+    $('input').iCheck({
+        checkboxClass: 'icheckbox_minimal-blue',
+        radioClass: 'iradio_minimal-blue',
+        increaseArea: '20%' // optional
+    });
+
 })(window, jQuery);
