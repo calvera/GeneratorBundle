@@ -77,7 +77,10 @@
         return $this->getDoctrine()
                     ->getManagerForClass('{{ model }}')
                     ->getRepository('{{ model }}')
-                    ->createQueryBuilder('q');
+                    ->createQueryBuilder('q')
+                    {% if cacheable %}
+                    ->setCacheable(true)
+                    {% endif %};
     }
 {% endblock %}
 

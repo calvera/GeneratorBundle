@@ -4,6 +4,7 @@ params:
     namespace_prefix: ~
     entity_manager: ~
     concurrency_lock: ~
+    cacheable: ~
     bundle_name: ~
     fields: ~
     credentials: ~

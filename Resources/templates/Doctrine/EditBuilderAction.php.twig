@@ -44,6 +44,9 @@ use Doctrine\ORM\OptimisticLockException;
              ->getRepository('{{ model }}')
              ->createQueryBuilder('q')
              ->where('q.{{ builder.getFieldGuesser().getModelPrimaryKeyName(model) }} = :pk')
+             {% if cacheable %}
+             ->setCacheable(true)
+             {% endif %}
              ->setParameter(':pk', $pk);
     }
 {% endblock %}
