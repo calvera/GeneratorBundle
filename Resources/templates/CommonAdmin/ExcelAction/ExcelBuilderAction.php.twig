@@ -15,8 +15,11 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 /**
  * @author Bob van de Vijver
  */
-class ExcelController extends ListController
+class ExcelController extends \{{ namespace_prefix }}\{{ bundle_name }}\Controller\{{ builder.generator.baseGeneratorName }}\ListController
 {
+
+    const COLUMN_COUNT = {{ builder.columns|length }};
+
     /**
      * Generates the Excel object and send a streamed response
      * @return \Symfony\Component\HttpFoundation\StreamedResponse
@@ -79,14 +82,14 @@ class ExcelController extends ListController
     {
         $translator = $this->get('translator');
         
-        {% set colNum = 0 %}
+        $column = 0;
         {% for column in builder.columns %}
-        $sheet->setCellValueByColumnAndRow({{ colNum }}, 1, $translator->trans("{{ column.label }}", array(), '{{ i18n_catalog|default("Admin") }}'), true);
-        $columnLetter = \PHPExcel_Cell::stringFromColumnIndex({{ colNum }});
+        $sheet->setCellValueByColumnAndRow($column, 1, $translator->trans("{{ column.label }}", array(), '{{ i18n_catalog|default("Admin") }}'), true);
+        $columnLetter = \PHPExcel_Cell::stringFromColumnIndex($column);
         $sheet->getStyle($columnLetter . '1')->getFont()->setBold(true);
         $sheet->getColumnDimension($columnLetter)->setAutoSize(true);
+        $column++;
 
-        {% set colNum = colNum + 1 %}
         {% endfor %}
     }
 
@@ -98,23 +101,29 @@ class ExcelController extends ListController
         $row = 2;
         $results = $this->getResults();
 
-        {% set colNum = 0 %}
         foreach($results as $rowData) {
-            {% for name,column in builder.columns %}
-            $data = $this->getValueForCell('{{ column.getter }}', $rowData);
-            $formatedValue = $this->format{{ name|classify|php_name }}($data);
-
-            // Convert DateTime object to given format
-            if ($formatedValue instanceof \DateTime){
-                $formatedValue = $formatedValue->format('{{ builder.dateTimeFormat }}');
-            }
-
-            $sheet->setCellValueByColumnAndRow({{ colNum }}, $row, $formatedValue);
-            {% set colNum = colNum + 1 %}
-            {% endfor %}
-
+            $this->createExcelRow($sheet, $row, $rowData);
             $row++;
+            }
+    }
+
+    /**
+     * Fills the Excel spreadsheet with data
+     */
+    protected function createExcelRow(\PhpExcel_Worksheet $sheet, $row, $rowData) {
+        $column = 0;
+
+        {% for name,column in builder.columns %}
+        $data = $this->getValueForCell('{{ column.getter }}', $rowData);
+        $formatedValue = $this->format{{ name|classify|php_name }}($data);
+        // Convert DateTime object to given format
+        if ($formatedValue instanceof \DateTime){
+            $formatedValue = $formatedValue->format('{{ builder.dateTimeFormat }}');
         }
+        $sheet->setCellValueByColumnAndRow($column, $row, $formatedValue);
+        $column++;
+
+        {% endfor %}
     }
     
     /**
