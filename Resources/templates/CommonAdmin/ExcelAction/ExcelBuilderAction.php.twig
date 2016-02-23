@@ -18,7 +18,14 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 class ExcelController extends \{{ namespace_prefix }}\{{ bundle_name }}\Controller\{{ builder.generator.baseGeneratorName }}\ListController
 {
 
-    const COLUMN_COUNT = {{ builder.columns|length }};
+    {% for fieldsetName,fieldset in builder.fieldsets %}
+      {% if "NONE" != fieldsetName[:4] %}
+          const COLUMN_COUNT_{{ fieldsetName|upper }} = {{ builder.columnsFor(fieldset)|length }};
+      {% else %}
+          const COLUMN_COUNT = {{ builder.columns|length }};
+      {% endif %}
+    {% endfor %}
+   
 
     /**
      * Generates the Excel object and send a streamed response
@@ -40,11 +47,34 @@ class ExcelController extends \{{ namespace_prefix }}\{{ bundle_name }}\Controll
         $this->createExcelObject($phpExcelObject);
         $sheet = $phpExcelObject->setActiveSheetIndex(0);
 
+    {% for fieldsetName,fieldset in builder.fieldsets %}
+      {% if "NONE" == fieldsetName[:4] %}
+
         // Create the first bold row in the Excel spreadsheet
         $this->createExcelHeader($sheet);
 
         // Print the data
         $this->createExcelData($sheet);
+
+      {% else %}
+        {% if loop.first %}
+        $type = $request->get('type');
+        if (!$type) {
+          $type = '{{ fieldsetName }}';
+        }
+        {% endif %}
+        if ($type == '{{ fieldsetName }}') {
+
+        // Create the first bold row in the Excel spreadsheet
+        $this->createExcelHeader{{ fieldsetName|classify|php_name }}($sheet);
+
+        // Print the data
+        $this->createExcelData{{ fieldsetName|classify|php_name }}($sheet);
+
+      }
+
+      {% endif %}
+    {% endfor %}
 
         // Create the Writer, Response and add header
         $writer = $phpexcel->createWriter($phpExcelObject, '{{ builder.filetype }}');
@@ -75,15 +105,22 @@ class ExcelController extends \{{ namespace_prefix }}\{{ bundle_name }}\Controll
           ->setDescription("AdminGenerator Excel export");
     }
 
+    {% for fieldsetName,fieldset in builder.fieldsets %}
     /**
      * Fill the Excel speadsheet with the headers
      */
-    protected function createExcelheader(\PhpExcel_Worksheet $sheet)
+      {% if "NONE" != fieldsetName[:4] %}
+    protected function createExcelHeader{{ fieldsetName|classify|php_name }}(\PhpExcel_Worksheet $sheet)
+        {% set columns = builder.columnsFor(fieldset) %}
+      {% else %}
+    protected function createExcelHeader(\PhpExcel_Worksheet $sheet)
+        {% set columns = builder.columns %}
+      {% endif %}
     {
         $translator = $this->get('translator');
         
         $column = 0;
-        {% for column in builder.columns %}
+        {% for column in columns %}
         $sheet->setCellValueByColumnAndRow($column, 1, $translator->trans("{{ column.label }}", array(), '{{ i18n_catalog|default("Admin") }}'), true);
         $columnLetter = \PHPExcel_Cell::stringFromColumnIndex($column);
         $sheet->getStyle($columnLetter . '1')->getFont()->setBold(true);
@@ -92,28 +129,47 @@ class ExcelController extends \{{ namespace_prefix }}\{{ bundle_name }}\Controll
 
         {% endfor %}
     }
+    {% endfor %}
 
+    {% for fieldsetName,fieldset in builder.fieldsets %}
     /**
      * Fills the Excel spreadsheet with data
      */
+      {% if "NONE" != fieldsetName[:4] %}
+    protected function createExcelData{{ fieldsetName|classify|php_name }}(\PhpExcel_Worksheet $sheet)
+      {% else %}
     protected function createExcelData(\PhpExcel_Worksheet $sheet)
+      {% endif %}
     {
         $row = 2;
         $results = $this->getResults();
 
         foreach($results as $rowData) {
-            $this->createExcelRow($sheet, $row, $rowData);
+      {% if "NONE" != fieldsetName[:4] %}
+            $this->createExcelRows{{ fieldsetName|classify|php_name }}($sheet, $row, $rowData);
+      {% else %}
+            $this->createExcelRows($sheet, $row, $rowData);
+      {% endif %}
             $row++;
             }
     }
+    {% endfor %}
 
+    {% for fieldsetName,fieldset in builder.fieldsets %}
     /**
      * Fills the Excel spreadsheet with data
      */
-    protected function createExcelRow(\PhpExcel_Worksheet $sheet, $row, $rowData) {
+      {% if "NONE" != fieldsetName[:4] %}
+    protected function createExcelRows{{ fieldsetName|classify|php_name }}(\PhpExcel_Worksheet $sheet, $row, $rowData)
+        {% set columns = builder.columnsFor(fieldset) %}
+      {% else %}
+    protected function createExcelRows(\PhpExcel_Worksheet $sheet, $row, $rowData)
+        {% set columns = builder.columns %}
+      {% endif %}
+    {
         $column = 0;
 
-        {% for name,column in builder.columns %}
+        {% for name,column in columns %}
         $data = $this->getValueForCell('{{ column.getter }}', $rowData);
         $formatedValue = $this->format{{ name|classify|php_name }}($data);
         // Convert DateTime object to given format
@@ -125,6 +181,7 @@ class ExcelController extends \{{ namespace_prefix }}\{{ bundle_name }}\Controll
 
         {% endfor %}
     }
+    {% endfor %}
     
     /**
      * Gets the value from the given field that will be place at an Excel cell
