@@ -13,50 +13,11 @@
             },
             options
         );
-        $(this.options.containerSelector).on('click', this.options.buttonSelector, this.clickHandler.bind(this));
-    };
-
-    S2A.singleActionsManager.prototype = {
-        clickHandler: function(evt){
-            var $elt = $(evt.currentTarget);
-
-            if (!this.isConfirmed($elt)) {
-                evt.preventDefault();
-                return;
+        $(this.options.containerSelector).find(this.options.buttonSelector).each(function(index, object) {
+            $(object).data('href', $(object).attr('href'));
+            $(object).attr('href', $(object).data('target'));
             }
-
-            if (this.isProtected($elt)) {
-                evt.preventDefault();
-                this.sendSecured($elt);
-            }
-        },
-
-        isConfirmed: function($elt){
-            // TODO: move confirm() to custom popin
-            return !$elt.data('confirm') || confirm($elt.data('confirm'));
-        },
-
-        isProtected: function($elt){
-            return !!$elt.data('csrf-token');
-        },
-
-        sendSecured: function($elt){
-            // Transform in POST request
-            var $form = $('<form />').attr({
-                method: 'POST',
-                action: $elt.attr('href'),
-                style:  'visibility: hidden'
-            }).appendTo($('body'));
-            // Add CSRF protection token
-            $('<input />').attr({
-                type:   'hidden',
-                name:   '_csrf_token',
-                value:  $elt.data('csrf-token')
-            }).appendTo($form);
-            // TODO: add pre-submit trigger
-            $form.submit();
-            // TODO: add post-submit trigger
-        }
+        );
     };
 
     S2A.batchActionsManager = function(options){
@@ -151,7 +112,17 @@
     });
 	
     // Display object actions tooltips
-    $('a.object-action[data-toggle="tooltip"]').tooltip(); 
+    $('a.object-action').closest('div').tooltip();
+
+    $('#confirmModal').on('show.bs.modal', function (event) {
+      var a = $(event.relatedTarget);
+      var csrf_token = a.data('csrf-token');
+      var action = a.data('href');
+      var confirm = a.data('confirm');
+      $(this).find('input[name=_csrf_token]').val(csrf_token);
+      $(this).find('form').attr('action', action);
+      $(this).find('.modal-title').text(confirm);
+    })
 
     // Object actions
     if (S2A.hasOwnProperty('singleActionsAdminOptions')) {
