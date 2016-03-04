@@ -2,6 +2,7 @@
 {% use '../CommonAdmin/stylesheets.php.twig' %}
 {% use '../CommonAdmin/javascripts.php.twig' %}
 {% use '../CommonAdmin/title.php.twig' %}
+{% use '../CommonAdmin/modals.php.twig' %}
 
 {{ echo_extends( builder.getBaseAdminTemplate ) }}
 
@@ -25,22 +26,4 @@
     </div>
 {{ echo_endblock() }}
 
-{{ echo_block('modals') }}
-<div id="confirmModal" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form role="form" action="#" method="post" data-ajax="false">
-        <input type="hidden" name="_csrf_token" value=""/>
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title"></h4>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">{{ echo_trans('action.custom.cancel') }}</button>
-          <button type="submit" class="btn btn-primary">{{ echo_trans('action.custom.confirm') }}</button>
-      </div>
-      </form>
-    </div>
-  </div>
-</div>
-{{ echo_endblock() }}
+{{- block('modals') -}}
