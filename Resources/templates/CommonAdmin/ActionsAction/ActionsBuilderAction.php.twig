@@ -25,6 +25,11 @@ class ActionsController extends BaseController
      */
     public function objectAction(Request $request, $pk, $action)
     {
+        // this is needed for confirmed object actions
+        if ($action == 'edit' || $action == 'show') {
+            return $this->redirectToRoute('{{ builder.baseActionsRoute }}_'.$action, array('pk' => $pk));
+        }
+
         $this->request = $request;
         $methodName = 'attemptObject'.ucfirst(strtolower($this->cleanMethodName($action)));
         if (!method_exists($this, $methodName)) {

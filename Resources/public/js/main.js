@@ -21,10 +21,9 @@
     S2A.singleActionsManager.prototype = {
         clickHandler: function(evt){
             var $elt = $(evt.currentTarget);
-
             if (this.needConfirmation($elt)) {
                 evt.preventDefault();
-                $('#confirmModal').modal('show', $elt);
+                $('#' + $elt.data('confirm-modal')).modal('show', $elt);
             } else if (this.isProtected($elt)) {
                 evt.preventDefault();
                 this.sendSecured($elt);
@@ -91,7 +90,7 @@
             }
 
             if (this.needConfirmation($elt)) {
-                $('#confirmBatchModal').modal('show', $elt);
+                $('#'+this.selectedOption($elt).data('confirm-modal')).modal('show', $elt);
                 return;
             }
 
@@ -113,7 +112,7 @@
         },
 
         needConfirmation: function($elt){
-            return this.selectedOption($elt).data('confirm');
+            return !!this.selectedOption($elt).data('confirm');
         },
 
         selectedOption: function ($elt) {
@@ -147,7 +146,7 @@
     // Display object actions tooltips
     $('a.object-action').tooltip();
 
-    $('#confirmModal').on('show.bs.modal', function (event) {
+    $('.confirm-object-modal').on('show.bs.modal', function (event) {
       var $elt = $(event.relatedTarget);
       var action = $elt.attr('href');
       var confirm = $elt.data('confirm');
@@ -164,7 +163,7 @@
       }
     });
 
-    $('#confirmBatchModal').on('show.bs.modal', function (event) {
+    $('.confirm-batch-modal').on('show.bs.modal', function (event) {
       var $elt = $(event.relatedTarget);
       var confirm = $(':selected', $elt).data('confirm');
       $(this).find('.modal-title').text(confirm);
@@ -174,6 +173,23 @@
       $(this).find('.cancel').click(function() {
         $elt.val(S2A.batchActionsAdminOptions.noActionValue);
       })
+    });
+
+    $('.confirm-generic-modal').on('show.bs.modal', function (event) {
+      var $elt = $(event.relatedTarget);
+      var action = $elt.attr('href');
+      var confirm = $elt.data('confirm');
+      var csrf_token = $elt.data('csrf-token');
+      $(this).find('.modal-title').text(confirm);
+      var $form = $(this).find('form');
+      $form.attr('action', action);
+      if (csrf_token) {
+        $('<input />').attr({
+                type:   'hidden',
+                name:   '_csrf_token',
+                value:  csrf_token
+            }).appendTo($form);
+      }
     });
 
     // Object actions
