@@ -32,7 +32,13 @@ class Action
 
     protected $confirm_message;
 
+<<<<<<< HEAD
     protected $csrf_protected = false;
+=======
+    protected $confirmModal;
+
+    protected $csrfProtected = false;
+>>>>>>> 4eb4fe0... added docs
 
     protected $force_intermediate = false;
 
@@ -153,7 +159,24 @@ class Action
     }
 
     /**
+<<<<<<< HEAD
      * @param boolean $csrf_protected
+=======
+     * @param string $confirmModal
+     */
+    public function setConfirmModal($confirmModal)
+    {
+        $this->confirmModal = $confirmModal;
+    }
+
+    public function getConfirmModal()
+    {
+        return $this->confirmModal;
+    }
+
+    /**
+     * @param boolean $csrfProtected
+>>>>>>> 4eb4fe0... added docs
      */
     public function setCsrfProtected($csrf_protected)
     {
