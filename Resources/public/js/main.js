@@ -13,9 +13,7 @@
             },
             options
         );
-        $(this.options.containerSelector)
-            .find(this.options.buttonSelector)
-            .on('click',this.clickHandler.bind(this));
+        $(this.options.containerSelector).on('click',this.options.buttonSelector,this.clickHandler.bind(this));
     };
 
     S2A.singleActionsManager.prototype = {
