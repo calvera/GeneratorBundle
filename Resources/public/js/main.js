@@ -19,10 +19,7 @@
     S2A.singleActionsManager.prototype = {
         clickHandler: function(evt){
             var $elt = $(evt.currentTarget);
-            if (this.needConfirmation($elt)) {
-                evt.preventDefault();
-                $('#' + $elt.data('confirm-modal')).modal('show', $elt);
-            } else if (this.isProtected($elt)) {
+            if (this.isProtected($elt) && !this.needConfirmation($elt)) {
                 evt.preventDefault();
                 this.sendSecured($elt);
             }
@@ -88,7 +85,7 @@
             }
 
             if (this.needConfirmation($elt)) {
-                $('#'+this.selectedOption($elt).data('confirm-modal')).modal('show', $elt);
+                $(this.selectedOption($elt).data('confirm-modal')).modal('show', $elt);
                 return;
             }
 
@@ -144,14 +141,33 @@
     // Display object actions tooltips
     $('a.object-action').tooltip();
 
-    $('.confirm-object-modal').on('show.bs.modal', function (event) {
+    // Save action for modals
+    $('.object-action, .generic-action, select[name=action] option').each(function(index, item) {
+        $item = $(item);
+        $item.data('action', $item.attr('href'));
+        $item.attr('href', $item.data('confirmModal'));
+    });
+
+    // hookup on submit button
+    $('button[type=submit].generic-action').click(function(event) {
+        event.preventDefault();
+    });
+
+    $('.confirm-object-modal, .confirm-generic-modal').on('show.bs.modal', function (event) {
       var $elt = $(event.relatedTarget);
-      var action = $elt.attr('href');
+      var $form = $(this).find('form');
+      var action = $elt.data('action');
       var confirm = $elt.data('confirm');
       var csrf_token = $elt.data('csrf-token');
-      var $form = $(this).find('form');
       $form.attr('action', action);
       $(this).find('.modal-title').text(confirm);
+      // submit button confirmation
+      if ($elt.is('button[type=submit]')) {
+        $form.submit(function(event) {
+           event.preventDefault();
+           $elt.closest('form').submit();
+        });
+      }
       if (csrf_token) {
         $('<input />').attr({
                 type:   'hidden',
@@ -171,23 +187,6 @@
       $(this).find('.cancel').click(function() {
         $elt.val(S2A.batchActionsAdminOptions.noActionValue);
       })
-    });
-
-    $('.confirm-generic-modal').on('show.bs.modal', function (event) {
-      var $elt = $(event.relatedTarget);
-      var action = $elt.attr('href');
-      var confirm = $elt.data('confirm');
-      var csrf_token = $elt.data('csrf-token');
-      $(this).find('.modal-title').text(confirm);
-      var $form = $(this).find('form');
-      $form.attr('action', action);
-      if (csrf_token) {
-        $('<input />').attr({
-                type:   'hidden',
-                name:   '_csrf_token',
-                value:  csrf_token
-            }).appendTo($form);
-      }
     });
 
     // Object actions

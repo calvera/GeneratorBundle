@@ -34,7 +34,8 @@
         value="{{ action.name }}"
         {%- if action.confirm and not action.forceIntermediate %}
             data-confirm="{{ echo_trans(action.confirm, {}, translationDomain, 'html_attr') }}"
-            data-confirm-modal="{{ action.confirmModal|default('confirmBatchModal') }}"
+            data-confirm-modal="{{ action.confirmModal|default('#confirmBatchModal') }}"
+            data-toggle="modal"
         {% endif -%}
         >
             {% if action.icon %}<i class="{% if action.icon is defined and action.icon|length > 0 %}fa {{ action.icon }}{% endif %}"></i> {% endif %}
