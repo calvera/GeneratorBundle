@@ -150,7 +150,9 @@
 
     // hookup on submit button
     $('button[type=submit].generic-action').click(function(event) {
-        event.preventDefault();
+        if ($(this).data('confirm')) {
+            event.preventDefault();
+        }
     });
 
     $('.confirm-object-modal, .confirm-generic-modal').on('show.bs.modal', function (event) {
