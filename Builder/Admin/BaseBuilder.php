@@ -252,7 +252,7 @@ class BaseBuilder extends GenericBaseBuilder
         if (null == $display || 0 == sizeof($display)) {
             $tabs = $this->getVariable('tabs');
 
-            if (null != $tabs || 0 < sizeof($tabs)) {
+            if (null != $tabs && 0 < sizeof($tabs)) {
                 $display = array();
 
                 foreach ($tabs as $tab) {
@@ -306,7 +306,7 @@ class BaseBuilder extends GenericBaseBuilder
         if (null == $display || 0 == sizeof($display)) {
             $tabs = $this->getVariable('tabs');
 
-            if (null != $tabs || 0 < sizeof($tabs)) {
+            if (null != $tabs && 0 < sizeof($tabs)) {
                 $display = array();
 
                 foreach ($tabs as $tab) {
